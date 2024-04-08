@@ -1,6 +1,7 @@
 import { Product } from '../types'
 import {
-  createContext, ReactNode,
+  createContext,
+  ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -18,6 +19,8 @@ interface BasketContextState {
   totalWeight: number
   totalPrice: number
   productsCount: number
+  personCount: number
+  sticks: number
 }
 
 interface BasketDispatchContextState {
@@ -25,6 +28,9 @@ interface BasketDispatchContextState {
   removeProduct: (product: Product) => void
   deleteProduct: (product: Product) => void
   isProductAdded: (product: Product) => boolean
+  setPersonCount: (count: number) => void
+  setSticks: (count: number) => void
+  clearProductList: () => void
 }
 
 const BasketContext = createContext<BasketContextState>(
@@ -62,6 +68,10 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       ? JSON.parse(localStorage.getItem('selectedProducts') as string)
       : {},
   )
+
+  const [personCount, setPersonCount] = useState<number>(1)
+  const [sticks, setSticks] = useState<number>(0)
+
   useEffect(() => {
     localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts))
   }, [selectedProducts])
@@ -100,6 +110,10 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       delete newState[product.id]
       return newState
     })
+  }, [])
+
+  const clearProductList = useCallback(() => {
+    setSelectedProducts({})
   }, [])
 
   const removeProduct = useCallback(
@@ -150,8 +164,10 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       totalWeight,
       totalPrice,
       productsCount: Object.values(selectedProducts).length,
+      personCount,
+      sticks,
     }),
-    [selectedProducts],
+    [selectedProducts, personCount, sticks],
   )
 
   const contextDispatchValue = useMemo(
@@ -160,8 +176,19 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       removeProduct,
       deleteProduct,
       isProductAdded,
+      setPersonCount,
+      setSticks,
+      clearProductList,
     }),
-    [addProduct, deleteProduct, removeProduct, isProductAdded],
+    [
+      addProduct,
+      deleteProduct,
+      removeProduct,
+      isProductAdded,
+      setPersonCount,
+      setSticks,
+      clearProductList,
+    ],
   )
 
   return (

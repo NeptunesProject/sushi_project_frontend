@@ -44,6 +44,52 @@ interface ChakraFactoryComponent {
   children?: ReactNode | ReactNode[]
 }
 
+interface ClientInfo {
+  phoneNumber: string
+  name: string
+}
+
+interface DeliveryAddress {
+  clientAddress: string
+}
+
+interface CartItem {
+  id: string
+  quantity: number
+}
+
+interface ReturnedOrder {
+  id: number
+  toDateTime: string
+  clientInfo: ClientInfo
+  deliveryAddress: DeliveryAddress
+  comment: string
+  peopleCount: number
+  cartItems: CartItem[]
+  sticksCount: number
+  studySticksCount: number
+  deliveryType: string
+  paymentType: 'ONLINE' | 'CASH' //temporaly until payment is done
+  statusType: 'CREATED' //temporaly because there is no information
+}
+
+type OrderToPost = Omit<ReturnedOrder, 'statusType' | 'id'>
+
+interface ProductObj {
+  count: number
+  product: object
+}
+
 type BasketTypes = 'basket' | 'delivery' | 'pay'
 
-export type { Languages, Product, ChakraFactoryComponent, BasketTypes, Category }
+export type {
+  Languages,
+  Product,
+  ChakraFactoryComponent,
+  BasketTypes,
+  Category,
+  OrderToPost,
+  ProductObj,
+  ReturnedOrder,
+  CartItem,
+}

@@ -15,6 +15,11 @@ import {
 import { BasketTypes } from '../../types'
 import { ArrowBackIcon } from '@chakra-ui/icons'
 import InfoToPay from './InfoToPay'
+import {
+  useBasketContext,
+  useBasketDispatchContext,
+} from 'contexts/BasketContext'
+import { makeOrder } from './makeOrderFunc'
 
 interface Props {
   setSelectedBasketType: React.Dispatch<React.SetStateAction<BasketTypes>>
@@ -25,6 +30,11 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [deliveryType, setDeliveryType] = useState('self')
   const [street, setStreet] = useState('')
+
+  const { personCount, sticks } = useBasketContext()
+  const { setPersonCount, setSticks, clearProductList } =
+    useBasketDispatchContext()
+
   return (
     <>
       <DrawerHeader
@@ -63,7 +73,7 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
                 onInput={(e) =>
                   setPhoneNumber((e.target as HTMLInputElement).value)
                 }
-                type="number"
+                type="tel"
                 placeholder="phone number"
               />
               {deliveryType === 'delivery' && (
@@ -99,7 +109,24 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
             borderColor="turquoise.77"
             bg="none"
             borderRadius={25}
-            onClick={() => setSelectedBasketType('delivery')}
+            onClick={() => {
+              makeOrder(
+                setSelectedBasketType,
+                name,
+                street,
+                deliveryType,
+                phoneNumber,
+                personCount,
+                sticks,
+                setName,
+                setPhoneNumber,
+                setDeliveryType,
+                setStreet,
+                setPersonCount as React.Dispatch<React.SetStateAction<number>>,
+                setSticks as React.Dispatch<React.SetStateAction<number>>,
+                clearProductList,
+              )
+            }}
           >
             Continue
           </Button>
