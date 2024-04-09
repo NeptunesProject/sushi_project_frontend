@@ -15,7 +15,11 @@ import {
 import { BasketTypes } from '../../types'
 import { ArrowBackIcon } from '@chakra-ui/icons'
 import InfoToPay from './InfoToPay'
-import Stripe from 'stripe'
+import {
+  useBasketContext,
+  useBasketDispatchContext,
+} from 'contexts/BasketContext'
+import { makeOrder } from './makeOrderFunc'
 
 interface Props {
   setSelectedBasketType: React.Dispatch<React.SetStateAction<BasketTypes>>
@@ -27,23 +31,9 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
   const [deliveryType, setDeliveryType] = useState('self')
   const [street, setStreet] = useState('')
 
-  const stripe = new Stripe(
-    'sk_test_51P3JwKP2CTDqUQgrkgBPAkZbujHrAhU1XRRySj1czuApDUf0bsjIhEZlWNCi4UsuufE8WyWvg7d8AFFpnpZg0YHt00YE8MFnOz',
-  )
-
-  async function createSession() {
-    const session = await stripe.checkout.sessions.create({
-      line_items: [
-        {
-          price: 'price_1MotwRLkdIwHu7ixYcPLm5uZ',
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      // success_url: 'https://example.com/success',
-    })
-    console.log(session.url)
-  }
+  const { personCount, sticks } = useBasketContext()
+  const { setPersonCount, setSticks, clearProductList } =
+    useBasketDispatchContext()
 
   return (
     <>
@@ -83,7 +73,7 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
                 onInput={(e) =>
                   setPhoneNumber((e.target as HTMLInputElement).value)
                 }
-                type="number"
+                type="tel"
                 placeholder="phone number"
               />
               {deliveryType === 'delivery' && (
@@ -120,8 +110,22 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
             bg="none"
             borderRadius={25}
             onClick={() => {
-              createSession()
-              setSelectedBasketType('delivery')
+              makeOrder(
+                setSelectedBasketType,
+                name,
+                street,
+                deliveryType,
+                phoneNumber,
+                personCount,
+                sticks,
+                setName,
+                setPhoneNumber,
+                setDeliveryType,
+                setStreet,
+                setPersonCount as React.Dispatch<React.SetStateAction<number>>,
+                setSticks as React.Dispatch<React.SetStateAction<number>>,
+                clearProductList,
+              )
             }}
           >
             Continue
