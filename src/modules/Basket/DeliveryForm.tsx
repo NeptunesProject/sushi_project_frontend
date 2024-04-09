@@ -19,20 +19,37 @@ import {
   useBasketContext,
   useBasketDispatchContext,
 } from 'contexts/BasketContext'
-import { makeOrder } from './makeOrderFunc'
+import { clearCard, clearLocaleStorage, makeOrder } from './makeOrderFuncs'
 
 interface Props {
   setSelectedBasketType: React.Dispatch<React.SetStateAction<BasketTypes>>
 }
 
-const DeliveryForm = ({ setSelectedBasketType }: Props) => {
-  const [name, setName] = useState('')
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [deliveryType, setDeliveryType] = useState('self')
-  const [street, setStreet] = useState('')
+const getFromLocaleStorage = (key: string, defaultValue: string): string => {
+  const storedValue = localStorage.getItem(key)
+  return storedValue ? JSON.parse(storedValue) : defaultValue
+}
 
-  const { personCount, sticks } = useBasketContext()
-  const { setPersonCount, setSticks, clearProductList } =
+const DeliveryForm = ({ setSelectedBasketType }: Props) => {
+  const [name, setName] = useState(() =>
+    getFromLocaleStorage('personInfo-Name', ''),
+  )
+  const [phoneNumber, setPhoneNumber] = useState(() =>
+    getFromLocaleStorage('personInfo-Number', ''),
+  )
+  const [deliveryType, setDeliveryType] = useState(() =>
+    getFromLocaleStorage('personInfo-Delivery', 'pickup'),
+  )
+  const [street, setStreet] = useState(() =>
+    getFromLocaleStorage('personInfo-Street', ''),
+  )
+
+  const [payment, setPayment] = useState(() =>
+    getFromLocaleStorage('paymentType', ''),
+  )
+
+  const { personCount, sticks, studySticks } = useBasketContext()
+  const { setPersonCount, setSticks, clearProductList, setStudySticks } =
     useBasketDispatchContext()
 
   return (
@@ -65,37 +82,73 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
             <Flex flexDir="column" gap={3} align="start" mb={4}>
               <Input
                 value={name}
-                onInput={(e) => setName((e.target as HTMLInputElement).value)}
+                onInput={(e) => {
+                  setName((e.target as HTMLInputElement).value)
+                  localStorage.setItem(
+                    'personInfo-Name',
+                    JSON.stringify((e.target as HTMLInputElement).value),
+                  )
+                }}
                 placeholder="name"
               />
               <Input
                 value={phoneNumber}
-                onInput={(e) =>
+                onInput={(e) => {
                   setPhoneNumber((e.target as HTMLInputElement).value)
-                }
+                  localStorage.setItem(
+                    'personInfo-Number',
+                    JSON.stringify((e.target as HTMLInputElement).value),
+                  )
+                }}
                 type="tel"
                 placeholder="phone number"
               />
               {deliveryType === 'delivery' && (
                 <Input
                   value={street}
-                  onInput={(e) =>
+                  onInput={(e) => {
                     setStreet((e.target as HTMLInputElement).value)
-                  }
+                    localStorage.setItem(
+                      'personInfo-Street',
+                      JSON.stringify((e.target as HTMLInputElement).value),
+                    )
+                  }}
                   type="text"
                   placeholder="street"
                 />
               )}
             </Flex>
 
-            <RadioGroup onChange={setDeliveryType}>
-              {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-              {/* @ts-expect-error */}
-              <Stack direction="column" value={deliveryType}>
-                <Radio defaultChecked value="self">
-                  Self pick-up
-                </Radio>
+            <RadioGroup
+              onChange={(value) => {
+                setDeliveryType(value)
+                localStorage.setItem(
+                  'personInfo-Delivery',
+                  JSON.stringify(value),
+                )
+              }}
+              value={deliveryType}
+            >
+              <Stack direction="column">
+                <Radio value="pickup">Self pick-up</Radio>
                 <Radio value="delivery">Delivery to address</Radio>
+              </Stack>
+            </RadioGroup>
+
+            <Text fontWeight={600} mb={2} mt={2}>
+              Payment method:
+            </Text>
+            <RadioGroup
+              onChange={(value) => {
+                setPayment(value)
+                localStorage.setItem('paymentType', JSON.stringify(value))
+              }}
+              value={payment}
+            >
+              <Stack direction="column">
+                <Radio value="cash">Cash on delivery</Radio>
+                <Radio value="terminal">Card on delivery</Radio>
+                <Radio value="online">Online</Radio>
               </Stack>
             </RadioGroup>
           </Box>
@@ -118,6 +171,10 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
                 phoneNumber,
                 personCount,
                 sticks,
+                studySticks,
+                payment,
+              )
+              clearCard(
                 setName,
                 setPhoneNumber,
                 setDeliveryType,
@@ -125,7 +182,11 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
                 setPersonCount as React.Dispatch<React.SetStateAction<number>>,
                 setSticks as React.Dispatch<React.SetStateAction<number>>,
                 clearProductList,
+                setStudySticks as React.Dispatch<React.SetStateAction<number>>,
+                setPayment,
               )
+              clearLocaleStorage()
+              setSelectedBasketType('orderResponse')
             }}
           >
             Continue

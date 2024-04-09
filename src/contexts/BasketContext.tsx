@@ -21,6 +21,12 @@ interface BasketContextState {
   productsCount: number
   personCount: number
   sticks: number
+  studySticks: number
+}
+interface IAdditionalProducts {
+  sticks: number
+  studySticks: number
+  personCount: number
 }
 
 interface BasketDispatchContextState {
@@ -31,6 +37,7 @@ interface BasketDispatchContextState {
   setPersonCount: (count: number) => void
   setSticks: (count: number) => void
   clearProductList: () => void
+  setStudySticks: (count: number) => void
 }
 
 const BasketContext = createContext<BasketContextState>(
@@ -60,6 +67,12 @@ const useBasketDispatchContext = () => {
   }
   return context
 }
+
+const getFromLocaleStorage = (key: string): IAdditionalProducts => {
+  const storedValue = localStorage.getItem(key)
+  return storedValue ? JSON.parse(storedValue) : {}
+}
+
 const BasketProvider = ({ children }: { children: ReactNode }) => {
   const [selectedProducts, setSelectedProducts] = useState<
     Record<number, ProductObj>
@@ -69,12 +82,40 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       : {},
   )
 
-  const [personCount, setPersonCount] = useState<number>(1)
-  const [sticks, setSticks] = useState<number>(0)
+  const [personCount, setPersonCount] = useState<number>(() => {
+    const additionalProducts = getFromLocaleStorage('additionalProducts')
+
+    return additionalProducts.personCount ? additionalProducts.personCount : 1
+  })
+
+  const [sticks, setSticks] = useState<number>(() => {
+    const additionalProducts = getFromLocaleStorage('additionalProducts')
+
+    return additionalProducts.sticks ? additionalProducts.sticks : 0
+  })
+
+  const [studySticks, setStudySticks] = useState<number>(() => {
+    const additionalProducts = getFromLocaleStorage('additionalProducts')
+
+    return additionalProducts.studySticks ? additionalProducts.studySticks : 0
+  })
+
+  const additionalProducts = useMemo(
+    () => ({
+      sticks,
+      studySticks,
+      personCount,
+    }),
+    [sticks, studySticks, personCount],
+  )
 
   useEffect(() => {
     localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts))
-  }, [selectedProducts])
+    localStorage.setItem(
+      'additionalProducts',
+      JSON.stringify(additionalProducts),
+    )
+  }, [selectedProducts, additionalProducts])
 
   const addProduct = useCallback(
     (product: Product, count?: number) => {
@@ -166,8 +207,9 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       productsCount: Object.values(selectedProducts).length,
       personCount,
       sticks,
+      studySticks,
     }),
-    [selectedProducts, personCount, sticks],
+    [selectedProducts, personCount, sticks, studySticks],
   )
 
   const contextDispatchValue = useMemo(
@@ -179,6 +221,7 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       setPersonCount,
       setSticks,
       clearProductList,
+      setStudySticks,
     }),
     [
       addProduct,
@@ -188,6 +231,7 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       setPersonCount,
       setSticks,
       clearProductList,
+      setStudySticks,
     ],
   )
 

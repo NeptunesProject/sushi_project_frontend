@@ -12,6 +12,7 @@ import { BasketTypes } from '../../types'
 import BasketType from './BasketType'
 import { useState } from 'react'
 import { useBasketContext } from '../../contexts/BasketContext'
+import { StatusForm } from './StatusForm'
 
 const Basket = () => {
   const [selectedBaketType, setSelectedBasketType] =
@@ -61,6 +62,9 @@ const Basket = () => {
           )}
           {selectedBaketType === 'delivery' && (
             <DeliveryForm setSelectedBasketType={setSelectedBasketType} />
+          )}
+          {selectedBaketType === 'orderResponse' && (
+            <StatusForm setSelectedBasketType={setSelectedBasketType} />
           )}
         </DrawerContent>
       </Drawer>
