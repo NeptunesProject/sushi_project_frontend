@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import Stripe from 'stripe'
 import {
   Box,
   Button,
@@ -12,7 +13,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
-import { BasketTypes } from '../../types'
+import { BasketTypes, ReturnedOrder } from '../../types'
 import { ArrowBackIcon } from '@chakra-ui/icons'
 import InfoToPay from './InfoToPay'
 import {
@@ -20,6 +21,9 @@ import {
   useBasketDispatchContext,
 } from 'contexts/BasketContext'
 import { makeOrder } from './makeOrderFunc'
+
+const STRIPE_SK = import.meta.env.VITE_STRIPE_SECRET_KEY
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL
 
 interface Props {
   setSelectedBasketType: React.Dispatch<React.SetStateAction<BasketTypes>>
@@ -34,6 +38,71 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
   const { personCount, sticks } = useBasketContext()
   const { setPersonCount, setSticks, clearProductList } =
     useBasketDispatchContext()
+  const stripe = new Stripe(STRIPE_SK)
+
+  async function createSession(order: ReturnedOrder) {
+    try {
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            price_data: {
+              currency: 'pln',
+              product_data: {
+                name: `Order #${order.id}`,
+              },
+              unit_amount: 6000,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${BASE_URL}?success=true&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${BASE_URL}?cancel=true&session_id={CHECKOUT_SESSION_ID}`,
+      })
+      if (session && session.url) {
+        window.location.replace(session.url)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  async function checkSession() {
+    try {
+      const queryString = window.location.search
+      const urlParams = new URLSearchParams(queryString)
+      const sessionId = urlParams.get('session_id')
+      if (sessionId) {
+        const session = await stripe.checkout.sessions.retrieve(sessionId)
+        console.log('session.status >>> ', session.status)
+        console.log('session.payment_status >>> ', session.payment_status)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  async function createOrder() {
+    const order = await makeOrder(
+      setSelectedBasketType,
+      name,
+      street,
+      deliveryType,
+      phoneNumber,
+      personCount,
+      sticks,
+      setName,
+      setPhoneNumber,
+      setDeliveryType,
+      setStreet,
+      setPersonCount as React.Dispatch<React.SetStateAction<number>>,
+      setSticks as React.Dispatch<React.SetStateAction<number>>,
+      clearProductList,
+    )
+    if (order && order.paymentType === 'ONLINE') {
+      createSession(order)
+    }
+  }
 
   return (
     <>
@@ -110,25 +179,23 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
             bg="none"
             borderRadius={25}
             onClick={() => {
-              makeOrder(
-                setSelectedBasketType,
-                name,
-                street,
-                deliveryType,
-                phoneNumber,
-                personCount,
-                sticks,
-                setName,
-                setPhoneNumber,
-                setDeliveryType,
-                setStreet,
-                setPersonCount as React.Dispatch<React.SetStateAction<number>>,
-                setSticks as React.Dispatch<React.SetStateAction<number>>,
-                clearProductList,
-              )
+              createOrder()
             }}
           >
             Continue
+          </Button>
+          <Button
+            alignSelf="end"
+            w="60%"
+            border="2px solid"
+            borderColor="turquoise.77"
+            bg="none"
+            borderRadius={25}
+            onClick={() => {
+              checkSession()
+            }}
+          >
+            Check
           </Button>
         </Flex>
       </DrawerBody>
