@@ -13,7 +13,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
-import { BasketTypes, ReturnedOrder } from '../../types'
+import { BasketTypes, ProductObj, ReturnedOrder } from '../../types'
 import { ArrowBackIcon } from '@chakra-ui/icons'
 import InfoToPay from './InfoToPay'
 import {
@@ -32,7 +32,7 @@ interface Props {
 const DeliveryForm = ({ setSelectedBasketType }: Props) => {
   const [name, setName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
-  const [deliveryType, setDeliveryType] = useState('self')
+  const [deliveryType, setDeliveryType] = useState('pickup')
   const [street, setStreet] = useState('')
 
   const { personCount, sticks } = useBasketContext()
@@ -42,6 +42,13 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
 
   async function createSession(order: ReturnedOrder) {
     try {
+      const productsList: Record<string, ProductObj> = JSON.parse(
+        localStorage.getItem('selectedProducts') || '{}',
+      )
+      const totalPrice = Object.values(productsList).reduce((acc, el) => {
+        return acc + el.product.price * el.count
+      }, 0)
+
       const session = await stripe.checkout.sessions.create({
         line_items: [
           {
@@ -50,7 +57,7 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
               product_data: {
                 name: `Order #${order.id}`,
               },
-              unit_amount: 6000,
+              unit_amount: totalPrice * 100,
             },
             quantity: 1,
           },

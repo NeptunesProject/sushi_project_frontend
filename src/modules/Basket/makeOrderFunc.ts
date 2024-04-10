@@ -73,7 +73,7 @@ export const makeOrder: IMakeOrder = async (
 
     setName('')
     setPhoneNumber('')
-    setDeliveryType('self')
+    setDeliveryType('pickup')
     setStreet('')
     setPersonCount(1)
     setSticks(0)

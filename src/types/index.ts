@@ -77,7 +77,7 @@ type OrderToPost = Omit<ReturnedOrder, 'statusType' | 'id'>
 
 interface ProductObj {
   count: number
-  product: object
+  product: Product
 }
 
 type BasketTypes = 'basket' | 'delivery' | 'pay'
