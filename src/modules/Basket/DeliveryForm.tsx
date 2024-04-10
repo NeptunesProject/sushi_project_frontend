@@ -92,6 +92,8 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
     }
   }
 
+  /* 
+  ? 
   async function checkSession() {
     try {
       const queryString = window.location.search
@@ -105,7 +107,7 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
     } catch (error) {
       console.log(error)
     }
-  }
+  } */
 
   async function createOrder() {
     const order = await makeOrder(
@@ -116,6 +118,13 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
       phoneNumber,
       personCount,
       sticks,
+      studySticks,
+      payment,
+    )
+    handleClick(
+      order.id,
+      setSelectedBasketType,
+      setOrderId,
       setName,
       setPhoneNumber,
       setDeliveryType,
@@ -123,6 +132,8 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
       setPersonCount as React.Dispatch<React.SetStateAction<number>>,
       setSticks as React.Dispatch<React.SetStateAction<number>>,
       clearProductList,
+      setStudySticks as React.Dispatch<React.SetStateAction<number>>,
+      setPayment,
     )
     if (order && order.paymentType === 'ONLINE') {
       createSession(order)
@@ -239,33 +250,11 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
             borderColor="turquoise.77"
             bg="none"
             borderRadius={25}
-            onClick={() =>
-              handleClick(
-                setSelectedBasketType,
-                name,
-                street,
-                deliveryType,
-                phoneNumber,
-                personCount,
-                sticks,
-                studySticks,
-                payment,
-                setOrderId,
-                setName,
-                setPhoneNumber,
-                setDeliveryType,
-                setStreet,
-                setPersonCount as React.Dispatch<React.SetStateAction<number>>,
-                setSticks as React.Dispatch<React.SetStateAction<number>>,
-                clearProductList,
-                setStudySticks as React.Dispatch<React.SetStateAction<number>>,
-                setPayment,
-              )
-            }
+            onClick={() => createOrder()}
           >
             Continue
           </Button>
-          <Button
+          {/* <Button
             alignSelf="end"
             w="60%"
             border="2px solid"
@@ -277,7 +266,7 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
             }}
           >
             Check
-          </Button>
+          </Button> */}
         </Flex>
       </DrawerBody>
     </>

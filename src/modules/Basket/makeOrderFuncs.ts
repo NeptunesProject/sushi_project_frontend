@@ -33,15 +33,8 @@ interface IClearCard {
 
 interface IHandleClick {
   (
+    orderId: number,
     setSelectedBasketType: DispatchSetter<BasketTypes>,
-    name: string,
-    street: string,
-    deliveryType: string,
-    phoneNumber: string,
-    personCount: number,
-    sticks: number,
-    studySticks: number,
-    payment: string,
     setOrderId: DispatchSetter<number>,
     setName: DispatchSetter<string>,
     setPhoneNumber: DispatchSetter<string>,
@@ -139,15 +132,8 @@ export const clearLocaleStorage = () => {
 }
 
 export const handleClick: IHandleClick = async (
+  orderId,
   setSelectedBasketType,
-  name,
-  street,
-  deliveryType,
-  phoneNumber,
-  personCount,
-  sticks,
-  studySticks,
-  payment,
   setOrderId,
   setName,
   setPhoneNumber,
@@ -159,18 +145,7 @@ export const handleClick: IHandleClick = async (
   setStudySticks,
   setPayment,
 ) => {
-  const response = await makeOrder(
-    setSelectedBasketType,
-    name,
-    street,
-    deliveryType,
-    phoneNumber,
-    personCount,
-    sticks,
-    studySticks,
-    payment,
-  )
-  setOrderId(response.id)
+  setOrderId(orderId)
   clearCard(
     setName,
     setPhoneNumber,
