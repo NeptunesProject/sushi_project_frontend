@@ -69,7 +69,7 @@ interface ReturnedOrder {
   sticksCount: number
   studySticksCount: number
   deliveryType: string
-  paymentType: 'ONLINE' | 'CASH' //temporaly until payment is done
+  paymentType: string
   statusType: 'CREATED' //temporaly because there is no information
 }
 
@@ -80,7 +80,7 @@ interface ProductObj {
   product: Product
 }
 
-type BasketTypes = 'basket' | 'delivery' | 'pay'
+type BasketTypes = 'basket' | 'delivery' | 'pay' | 'orderResponse'
 
 export type {
   Languages,
