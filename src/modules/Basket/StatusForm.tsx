@@ -9,9 +9,10 @@ import svg from '../../assets/img/done.svg'
 
 interface Props {
   setSelectedBasketType: React.Dispatch<React.SetStateAction<BasketTypes>>
+  orderId: number | undefined
 }
 
-export const StatusForm = ({ setSelectedBasketType }: Props) => {
+export const StatusForm = ({ setSelectedBasketType, orderId }: Props) => {
   return (
     <>
       <DrawerHeader
@@ -36,7 +37,7 @@ export const StatusForm = ({ setSelectedBasketType }: Props) => {
       </DrawerHeader>
       <DrawerBody color="blue.200">
         <Text fontWeight={600} mb={4} ml={5}>
-          Your order № has been accepted.
+          Your order №{orderId} has been accepted.
         </Text>
         <Text fontWeight={600} mb={2} ml={5}>
           We will contact you as soon as possible to confirm your order.

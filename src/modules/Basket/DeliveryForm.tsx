@@ -19,10 +19,11 @@ import {
   useBasketContext,
   useBasketDispatchContext,
 } from 'contexts/BasketContext'
-import { clearCard, clearLocaleStorage, makeOrder } from './makeOrderFuncs'
+import { handleClick } from './makeOrderFuncs'
 
 interface Props {
   setSelectedBasketType: React.Dispatch<React.SetStateAction<BasketTypes>>
+  setOrderId: React.Dispatch<React.SetStateAction<number>>
 }
 
 const getFromLocaleStorage = (key: string, defaultValue: string): string => {
@@ -30,7 +31,7 @@ const getFromLocaleStorage = (key: string, defaultValue: string): string => {
   return storedValue ? JSON.parse(storedValue) : defaultValue
 }
 
-const DeliveryForm = ({ setSelectedBasketType }: Props) => {
+const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
   const [name, setName] = useState(() =>
     getFromLocaleStorage('personInfo-Name', ''),
   )
@@ -162,8 +163,8 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
             borderColor="turquoise.77"
             bg="none"
             borderRadius={25}
-            onClick={() => {
-              makeOrder(
+            onClick={() =>
+              handleClick(
                 setSelectedBasketType,
                 name,
                 street,
@@ -173,8 +174,7 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
                 sticks,
                 studySticks,
                 payment,
-              )
-              clearCard(
+                setOrderId,
                 setName,
                 setPhoneNumber,
                 setDeliveryType,
@@ -185,9 +185,7 @@ const DeliveryForm = ({ setSelectedBasketType }: Props) => {
                 setStudySticks as React.Dispatch<React.SetStateAction<number>>,
                 setPayment,
               )
-              clearLocaleStorage()
-              setSelectedBasketType('orderResponse')
-            }}
+            }
           >
             Continue
           </Button>

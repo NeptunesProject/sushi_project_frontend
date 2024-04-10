@@ -3,7 +3,7 @@ import { BasketTypes, CartItem, ProductObj, ReturnedOrder } from 'types'
 
 type DispatchSetter<T> = React.Dispatch<React.SetStateAction<T>>
 
-export interface IMakeOrder {
+interface IMakeOrder {
   (
     setSelectedBasketType: DispatchSetter<BasketTypes>,
     name: string,
@@ -17,8 +17,32 @@ export interface IMakeOrder {
   ): Promise<ReturnedOrder>
 }
 
-export interface IClearCard {
+interface IClearCard {
   (
+    setName: DispatchSetter<string>,
+    setPhoneNumber: DispatchSetter<string>,
+    setDeliveryType: DispatchSetter<string>,
+    setStreet: DispatchSetter<string>,
+    setPersonCount: DispatchSetter<number>,
+    setSticks: DispatchSetter<number>,
+    clearProductList: () => void,
+    setStudySticks: DispatchSetter<number>,
+    setPayment: DispatchSetter<string>,
+  ): void
+}
+
+interface IHandleClick {
+  (
+    setSelectedBasketType: DispatchSetter<BasketTypes>,
+    name: string,
+    street: string,
+    deliveryType: string,
+    phoneNumber: string,
+    personCount: number,
+    sticks: number,
+    studySticks: number,
+    payment: string,
+    setOrderId: DispatchSetter<number>,
     setName: DispatchSetter<string>,
     setPhoneNumber: DispatchSetter<string>,
     setDeliveryType: DispatchSetter<string>,
@@ -74,7 +98,7 @@ export const makeOrder: IMakeOrder = async (
       studySticksCount: studySticks,
       sticksCount: sticks,
       deliveryType: deliveryType.toUpperCase(),
-      paymentType: payment.toUpperCase(), // Temporary default value
+      paymentType: payment.toUpperCase(),
     })
 
     return order
@@ -112,4 +136,52 @@ export const clearLocaleStorage = () => {
   localStorage.setItem('personInfo-Delivery', JSON.stringify('pickup'))
   localStorage.setItem('personInfo-Street', JSON.stringify(''))
   localStorage.setItem('paymentType', JSON.stringify(''))
+}
+
+export const handleClick: IHandleClick = async (
+  setSelectedBasketType,
+  name,
+  street,
+  deliveryType,
+  phoneNumber,
+  personCount,
+  sticks,
+  studySticks,
+  payment,
+  setOrderId,
+  setName,
+  setPhoneNumber,
+  setDeliveryType,
+  setStreet,
+  setPersonCount,
+  setSticks,
+  clearProductList,
+  setStudySticks,
+  setPayment,
+) => {
+  const response = await makeOrder(
+    setSelectedBasketType,
+    name,
+    street,
+    deliveryType,
+    phoneNumber,
+    personCount,
+    sticks,
+    studySticks,
+    payment,
+  )
+  setOrderId(response.id)
+  clearCard(
+    setName,
+    setPhoneNumber,
+    setDeliveryType,
+    setStreet,
+    setPersonCount,
+    setSticks,
+    clearProductList,
+    setStudySticks,
+    setPayment,
+  )
+  clearLocaleStorage()
+  setSelectedBasketType('orderResponse')
 }
