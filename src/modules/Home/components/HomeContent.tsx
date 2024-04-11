@@ -30,7 +30,6 @@ const HomeContent = () => {
     }, {})
   }, [categories, isDataEmpty, isLoading, products])
 
-
   return (
     <Container maxW="container.lg" pb={10} pt={20} w="85%">
       <HomeSlider />

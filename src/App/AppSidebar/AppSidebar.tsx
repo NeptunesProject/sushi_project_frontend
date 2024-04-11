@@ -5,9 +5,23 @@ import useCategories from '../../hooks/useCategories'
 import { useMemo } from 'react'
 import { Category } from '../../types'
 
+const scrollToSection = (categoryName: string) => {
+  const sectionId = `${categoryName}`
+  const section = document.getElementById(sectionId)
+
+  if (section) {
+    const offsetTop = section.offsetTop - 200
+    window.scrollTo({
+      top: offsetTop,
+      behavior: 'smooth',
+    })
+  }
+}
+
 const AppSidebar = () => {
   const { i18n } = useTranslation()
   const { categories } = useCategories()
+
   const currentLanguage = i18n.language
 
   const categoriesWithMetadata = useMemo(() => {
@@ -63,6 +77,7 @@ const AppSidebar = () => {
           w={{ base: 77, lg: 105 }}
           cursor="pointer"
           role="group"
+          onClick={() => scrollToSection(category.name)}
         >
           <Image src={category.img} boxSize={19} />
           <Text
