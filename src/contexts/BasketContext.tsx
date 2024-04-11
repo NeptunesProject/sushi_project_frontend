@@ -1,4 +1,4 @@
-import { Product } from '../types'
+import { Product, Voucher } from '../types'
 import {
   createContext,
   ReactNode,
@@ -22,6 +22,7 @@ interface BasketContextState {
   personCount: number
   sticks: number
   studySticks: number
+  voucher: Voucher
 }
 interface IAdditionalProducts {
   sticks: number
@@ -38,6 +39,7 @@ interface BasketDispatchContextState {
   setSticks: (count: number) => void
   clearProductList: () => void
   setStudySticks: (count: number) => void
+  setVoucher: (voucher: Voucher) => void
 }
 
 const BasketContext = createContext<BasketContextState>(
@@ -100,6 +102,12 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
     return additionalProducts.studySticks ? additionalProducts.studySticks : 0
   })
 
+  const [voucher, setVoucher] = useState(
+    localStorage.getItem('voucher')
+      ? JSON.parse(localStorage.getItem('voucher') as string)
+      : { discount: 1 },
+  )
+
   const additionalProducts = useMemo(
     () => ({
       sticks,
@@ -115,7 +123,8 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       'additionalProducts',
       JSON.stringify(additionalProducts),
     )
-  }, [selectedProducts, additionalProducts])
+    localStorage.setItem('voucher', JSON.stringify(voucher))
+  }, [selectedProducts, additionalProducts, voucher])
 
   const addProduct = useCallback(
     (product: Product, count?: number) => {
@@ -208,8 +217,9 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       personCount,
       sticks,
       studySticks,
+      voucher,
     }),
-    [selectedProducts, personCount, sticks, studySticks],
+    [selectedProducts, personCount, sticks, studySticks, voucher],
   )
 
   const contextDispatchValue = useMemo(
@@ -222,6 +232,7 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       setSticks,
       clearProductList,
       setStudySticks,
+      setVoucher,
     }),
     [
       addProduct,
@@ -232,6 +243,7 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       setSticks,
       clearProductList,
       setStudySticks,
+      setVoucher,
     ],
   )
 

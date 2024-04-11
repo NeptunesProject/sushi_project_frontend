@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Stripe from 'stripe'
 import {
   Box,
@@ -13,7 +13,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
-import { BasketTypes, ProductObj, ReturnedOrder } from '../../types'
+import { BasketTypes, ReturnedOrder } from '../../types'
 import { ArrowBackIcon } from '@chakra-ui/icons'
 import InfoToPay from './InfoToPay'
 import {
@@ -21,6 +21,7 @@ import {
   useBasketDispatchContext,
 } from 'contexts/BasketContext'
 import { handleClick, makeOrder } from './makeOrderFuncs'
+import { postVoucher } from 'api'
 
 const STRIPE_SK = import.meta.env.VITE_STRIPE_SECRET_KEY
 const BASE_URL = import.meta.env.VITE_APP_BASE_URL
@@ -52,21 +53,26 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
   const [payment, setPayment] = useState(() =>
     getFromLocaleStorage('paymentType', ''),
   )
+  const [voucherCode, setVoucherCode] = useState('')
 
-  const { personCount, sticks, studySticks } = useBasketContext()
-  const { setPersonCount, setSticks, clearProductList, setStudySticks } =
-    useBasketDispatchContext()
+  const { personCount, sticks, studySticks, totalPrice, voucher } =
+    useBasketContext()
+  const {
+    setPersonCount,
+    setSticks,
+    clearProductList,
+    setStudySticks,
+    setVoucher,
+  } = useBasketDispatchContext()
   const stripe = new Stripe(STRIPE_SK)
+
+  useEffect(() => {
+    setVoucher({ discount: voucher.discount, error: '' })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function createSession(order: ReturnedOrder) {
     try {
-      const productsList: Record<string, ProductObj> = JSON.parse(
-        localStorage.getItem('selectedProducts') || '{}',
-      )
-      const totalPrice = Object.values(productsList).reduce((acc, el) => {
-        return acc + el.product.price * el.count
-      }, 0)
-
       const session = await stripe.checkout.sessions.create({
         line_items: [
           {
@@ -75,7 +81,7 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
               product_data: {
                 name: `Order #${order.id}`,
               },
-              unit_amount: totalPrice * 100,
+              unit_amount: totalPrice * voucher.discount * 100,
             },
             quantity: 1,
           },
@@ -140,6 +146,26 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
     }
   }
 
+  async function validateVoucher() {
+    try {
+      if (voucherCode !== '') {
+        const result = await postVoucher(voucherCode)
+        if (result) {
+          setVoucherCode('')
+          setVoucher({
+            discount: 1 - result.discountPercentage,
+            error: '',
+          })
+        }
+      }
+    } catch (error) {
+      console.error(error)
+      if (error === 'Voucher not found.') {
+        setVoucher({ discount: 1, error })
+      }
+    }
+  }
+
   return (
     <>
       <DrawerHeader
@@ -156,7 +182,7 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
         </Text>
         <DrawerCloseButton pos="static" />
       </DrawerHeader>
-      <DrawerBody color="blue.200">
+      <DrawerBody color="blue.200" pr="2">
         <Flex flexDir="column" gap={5}>
           <Text fontSize={18} fontWeight={600} mb={5}>
             Confirm order
@@ -171,10 +197,10 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
               <Input
                 value={name}
                 onInput={(e) => {
-                  setName((e.target as HTMLInputElement).value)
+                  setName((e.target as HTMLInputElement).value.trim())
                   localStorage.setItem(
                     'personInfo-Name',
-                    JSON.stringify((e.target as HTMLInputElement).value),
+                    JSON.stringify((e.target as HTMLInputElement).value.trim()),
                   )
                 }}
                 placeholder="name"
@@ -182,10 +208,10 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
               <Input
                 value={phoneNumber}
                 onInput={(e) => {
-                  setPhoneNumber((e.target as HTMLInputElement).value)
+                  setPhoneNumber((e.target as HTMLInputElement).value.trim())
                   localStorage.setItem(
                     'personInfo-Number',
-                    JSON.stringify((e.target as HTMLInputElement).value),
+                    JSON.stringify((e.target as HTMLInputElement).value.trim()),
                   )
                 }}
                 type="tel"
@@ -195,10 +221,12 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
                 <Input
                   value={street}
                   onInput={(e) => {
-                    setStreet((e.target as HTMLInputElement).value)
+                    setStreet((e.target as HTMLInputElement).value.trim())
                     localStorage.setItem(
                       'personInfo-Street',
-                      JSON.stringify((e.target as HTMLInputElement).value),
+                      JSON.stringify(
+                        (e.target as HTMLInputElement).value.trim(),
+                      ),
                     )
                   }}
                   type="text"
@@ -239,6 +267,60 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
                 <Radio value="online">Online</Radio>
               </Stack>
             </RadioGroup>
+          </Box>
+
+          <Box>
+            <Text fontWeight={600} mb={2}>
+              Apply voucher:
+            </Text>
+            <Flex flexDir="column" gap={2}>
+              <Input
+                value={voucherCode}
+                onChange={(e) => {
+                  setVoucherCode(e.target.value.trim())
+                }}
+                type="text"
+                placeholder="Enter voucher"
+              />
+              {(voucher.discount !== 1 || voucher.error !== '') && (
+                <Text mb={2} color={voucher.error ? '#cc0000' : '#279085'}>
+                  {voucher.error !== ''
+                    ? `Error: ${voucher.error}`
+                    : `Discount applied: 
+                    ${Number(((1 - voucher.discount) * 100).toFixed(2))}%`}
+                </Text>
+              )}
+              <Flex gap={2}>
+                <Button
+                  alignSelf="end"
+                  w="60%"
+                  border="2px solid"
+                  borderColor="turquoise.77"
+                  bg="none"
+                  borderRadius={25}
+                  onClick={() => validateVoucher()}
+                >
+                  Apply
+                </Button>
+                <Button
+                  alignSelf="end"
+                  w="60%"
+                  border="2px solid"
+                  borderColor="turquoise.77"
+                  bg="none"
+                  borderRadius={25}
+                  onClick={() => {
+                    setVoucherCode('')
+                    setVoucher({
+                      discount: 1,
+                      error: '',
+                    })
+                  }}
+                >
+                  Cancel
+                </Button>
+              </Flex>
+            </Flex>
           </Box>
 
           <InfoToPay />

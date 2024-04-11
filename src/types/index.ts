@@ -80,6 +80,18 @@ interface ProductObj {
   product: Product
 }
 
+interface Voucher {
+  discount: number
+  error: string
+}
+
+interface ValidatedVoucher {
+  code: string
+  dateUntilValid: number
+  quantityOfUse: number
+  discountPercentage: number
+}
+
 type BasketTypes = 'basket' | 'delivery' | 'pay' | 'orderResponse'
 
 export type {
@@ -92,4 +104,6 @@ export type {
   ProductObj,
   ReturnedOrder,
   CartItem,
+  Voucher,
+  ValidatedVoucher,
 }
