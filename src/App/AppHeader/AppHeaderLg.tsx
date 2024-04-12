@@ -8,7 +8,14 @@ import phone from 'assets/img/phone.svg'
 
 const AppHeaderLg = () => {
   return (
-    <Flex align="end" pt={5} px={2.5} justifyContent="space-between">
+    <Flex
+      align="end"
+      pt={2}
+      pb={2}
+      px={2.5}
+      justifyContent="space-between"
+      alignItems="center"
+    >
       <Logo />
 
       <Flex gap={{ base: 5, xl: 16 }}>
