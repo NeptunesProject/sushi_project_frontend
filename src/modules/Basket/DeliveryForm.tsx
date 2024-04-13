@@ -130,7 +130,7 @@ const DeliveryForm = ({ setSelectedBasketType, setOrderId }: Props) => {
     handleClick(
       order.id,
       setSelectedBasketType,
-      setOrderId,
+      setOrderId as React.Dispatch<React.SetStateAction<number>>,
       setName,
       setPhoneNumber,
       setDeliveryType,

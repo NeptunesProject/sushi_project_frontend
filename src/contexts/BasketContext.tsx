@@ -40,6 +40,11 @@ interface BasketDispatchContextState {
   clearProductList: () => void
   setStudySticks: (count: number) => void
   setVoucher: (voucher: Voucher) => void
+  calculateDiscountedPrice: (
+    price: number,
+    discounts: Record<number, string>,
+    quantity: number,
+  ) => number
 }
 
 const BasketContext = createContext<BasketContextState>(
@@ -125,6 +130,26 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
     )
     localStorage.setItem('voucher', JSON.stringify(voucher))
   }, [selectedProducts, additionalProducts, voucher])
+
+  const calculateDiscountedPrice = useCallback(
+    (price: number, discounts: Record<number, string>, quantity: number) => {
+      let discount = 0
+
+      const keys = Object.keys(discounts)
+        .map(Number)
+        .sort((a, b) => b - a)
+
+      for (const key of keys) {
+        if (quantity >= key) {
+          discount = parseFloat(discounts[key])
+          break
+        }
+      }
+
+      return price * (1 - discount)
+    },
+    [],
+  )
 
   const addProduct = useCallback(
     (product: Product, count?: number) => {
@@ -233,6 +258,7 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       clearProductList,
       setStudySticks,
       setVoucher,
+      calculateDiscountedPrice,
     }),
     [
       addProduct,
@@ -244,6 +270,7 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       clearProductList,
       setStudySticks,
       setVoucher,
+      calculateDiscountedPrice,
     ],
   )
 

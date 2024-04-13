@@ -16,9 +16,10 @@ import { StatusForm } from './StatusForm'
 const Basket = () => {
   const [selectedBaketType, setSelectedBasketType] =
     useState<BasketTypes>('basket')
-  const [orderId, setOrderId] = useState<number | undefined>()
+  const [orderId, setOrderId] = useState<number>()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { productsCount } = useBasketContext()
+
   return (
     <>
       <Center
@@ -62,7 +63,9 @@ const Basket = () => {
           )}
           {selectedBaketType === 'delivery' && (
             <DeliveryForm
-              setOrderId={setOrderId}
+              setOrderId={
+                setOrderId as React.Dispatch<React.SetStateAction<number>>
+              }
               setSelectedBasketType={setSelectedBasketType}
             />
           )}

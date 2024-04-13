@@ -14,13 +14,39 @@ interface Props {
 }
 
 const ProductCard = ({ product }: Props) => {
-  const { addProduct, isProductAdded } = useBasketDispatchContext()
+  const { addProduct, isProductAdded, calculateDiscountedPrice } =
+    useBasketDispatchContext()
   const { products } = useBasketContext()
   const [count, setCount] = useState(1)
   const navigate = useNavigate()
-  const { img, price, weight, cartCount, name, id } = product
+
+  const {
+    img,
+    price,
+    weight,
+    cartCount,
+    name,
+    id,
+    // discount will be here
+  } = product
+
+  const discount = {
+    id: 1,
+    discountPerQuantity: {
+      1: '0.1',
+      5: '0.3',
+      10: '0.5',
+    },
+  }
 
   const isThisProductAdded = useMemo(() => isProductAdded(product), [products])
+
+  const discountedPrice = calculateDiscountedPrice(
+    price,
+    discount.discountPerQuantity,
+    count,
+  )
+
   return (
     <Flex
       fontFamily="'Roboto', sans-serif"
@@ -68,7 +94,9 @@ const ProductCard = ({ product }: Props) => {
           <Text color="blue.200" fontWeight={700}>
             {price} zł
           </Text>
-
+          <Text color="blue.200" fontWeight={700}>
+            {discountedPrice} zł
+          </Text>
           <Flex gap={{ base: 0.5, md: 1 }}>
             <CountButton
               onClick={(e) => {
@@ -102,7 +130,9 @@ const ProductCard = ({ product }: Props) => {
           color="white"
           h={8}
           borderRadius={20}
-          onClick={() => addProduct(product, count)}
+          onClick={() => {
+            addProduct(product, count)
+          }}
         >
           {isThisProductAdded ? 'Added to basket' : 'Buy'}
         </Button>

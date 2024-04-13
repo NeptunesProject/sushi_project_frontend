@@ -21,6 +21,7 @@ const InfoToPay = () => {
             {Number(discountedPrice.toFixed(2))} zl
           </Text>
         )}
+      
         <Text
           color="blue.200"
           fontWeight={600}
