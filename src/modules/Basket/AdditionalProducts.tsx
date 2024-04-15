@@ -1,10 +1,46 @@
 import React from 'react'
 import { Flex, Text } from '@chakra-ui/react'
 import CountButton from '../../ui/CountButton'
+import {
+  useBasketContext,
+  useBasketDispatchContext,
+} from 'contexts/BasketContext'
 
 const AdditionalProducts = () => {
-  const [personCount, setPersonCount] = React.useState(1)
-  const [sticks, setSticks] = React.useState(0)
+  const { personCount, sticks, studySticks } = useBasketContext()
+  const { setPersonCount, setSticks, setStudySticks } =
+    useBasketDispatchContext()
+
+  const handlePersonCountDecrement = () => {
+    if (personCount > 1) {
+      setPersonCount(personCount - 1)
+    }
+  }
+
+  const handlePersonCountIncrement = () => {
+    setPersonCount(personCount + 1)
+  }
+
+  const handleSticksDecrement = () => {
+    if (sticks > 0) {
+      setSticks(sticks - 1)
+    }
+  }
+
+  const handleSticksIncrement = () => {
+    setSticks(sticks + 1)
+  }
+
+  const handleStudySticksDecrement = () => {
+    if (studySticks > 0) {
+      setStudySticks(studySticks - 1)
+    }
+  }
+
+  const handleStudySticksIncrement = () => {
+    setStudySticks(studySticks + 1)
+  }
+
   return (
     <Flex flexDir="column" fontWeight={600} gap={3}>
       <Flex w="100%" justify="space-between">
@@ -14,12 +50,7 @@ const AdditionalProducts = () => {
           <CountButton
             borderLeftRadius={20}
             borderRightRadius={5}
-            onClick={(e) => {
-              e.preventDefault()
-              if (personCount > 1) {
-                setPersonCount((prev) => prev - 1)
-              }
-            }}
+            onClick={handlePersonCountDecrement}
           >
             -
           </CountButton>
@@ -31,10 +62,7 @@ const AdditionalProducts = () => {
           <CountButton
             borderRightRadius={20}
             borderLeftRadius={5}
-            onClick={(e) => {
-              e.preventDefault()
-              setPersonCount((prev) => prev + 1)
-            }}
+            onClick={handlePersonCountIncrement}
           >
             +
           </CountButton>
@@ -42,18 +70,13 @@ const AdditionalProducts = () => {
       </Flex>
 
       <Flex w="100%" justify="space-between">
-        <Text>Кількість навчальних паличок</Text>
+        <Text>Кількість паличок</Text>
 
         <Flex align="center" gap={2}>
           <CountButton
             borderLeftRadius={20}
             borderRightRadius={5}
-            onClick={(e) => {
-              e.preventDefault()
-              if (sticks > 0) {
-                setSticks((prev) => prev - 1)
-              }
-            }}
+            onClick={handleSticksDecrement}
           >
             -
           </CountButton>
@@ -65,10 +88,32 @@ const AdditionalProducts = () => {
           <CountButton
             borderRightRadius={20}
             borderLeftRadius={5}
-            onClick={(e) => {
-              e.preventDefault()
-              setSticks((prev) => prev + 1)
-            }}
+            onClick={handleSticksIncrement}
+          >
+            +
+          </CountButton>
+        </Flex>
+      </Flex>
+      <Flex w="100%" justify="space-between">
+        <Text>Кількість навчальних паличок</Text>
+
+        <Flex align="center" gap={2}>
+          <CountButton
+            borderLeftRadius={20}
+            borderRightRadius={5}
+            onClick={handleStudySticksDecrement}
+          >
+            -
+          </CountButton>
+
+          <Text fontSize={12} fontWeight={600}>
+            {studySticks}
+          </Text>
+
+          <CountButton
+            borderRightRadius={20}
+            borderLeftRadius={5}
+            onClick={handleStudySticksIncrement}
           >
             +
           </CountButton>

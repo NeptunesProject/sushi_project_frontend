@@ -1,6 +1,7 @@
-import { Product } from '../types'
+import { Product, Voucher } from '../types'
 import {
-  createContext, ReactNode,
+  createContext,
+  ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -18,6 +19,15 @@ interface BasketContextState {
   totalWeight: number
   totalPrice: number
   productsCount: number
+  personCount: number
+  sticks: number
+  studySticks: number
+  voucher: Voucher
+}
+interface IAdditionalProducts {
+  sticks: number
+  studySticks: number
+  personCount: number
 }
 
 interface BasketDispatchContextState {
@@ -25,6 +35,11 @@ interface BasketDispatchContextState {
   removeProduct: (product: Product) => void
   deleteProduct: (product: Product) => void
   isProductAdded: (product: Product) => boolean
+  setPersonCount: (count: number) => void
+  setSticks: (count: number) => void
+  clearProductList: () => void
+  setStudySticks: (count: number) => void
+  setVoucher: (voucher: Voucher) => void
 }
 
 const BasketContext = createContext<BasketContextState>(
@@ -54,6 +69,12 @@ const useBasketDispatchContext = () => {
   }
   return context
 }
+
+const getFromLocaleStorage = (key: string): IAdditionalProducts => {
+  const storedValue = localStorage.getItem(key)
+  return storedValue ? JSON.parse(storedValue) : {}
+}
+
 const BasketProvider = ({ children }: { children: ReactNode }) => {
   const [selectedProducts, setSelectedProducts] = useState<
     Record<number, ProductObj>
@@ -62,9 +83,48 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       ? JSON.parse(localStorage.getItem('selectedProducts') as string)
       : {},
   )
+
+  const [personCount, setPersonCount] = useState<number>(() => {
+    const additionalProducts = getFromLocaleStorage('additionalProducts')
+
+    return additionalProducts.personCount ? additionalProducts.personCount : 1
+  })
+
+  const [sticks, setSticks] = useState<number>(() => {
+    const additionalProducts = getFromLocaleStorage('additionalProducts')
+
+    return additionalProducts.sticks ? additionalProducts.sticks : 0
+  })
+
+  const [studySticks, setStudySticks] = useState<number>(() => {
+    const additionalProducts = getFromLocaleStorage('additionalProducts')
+
+    return additionalProducts.studySticks ? additionalProducts.studySticks : 0
+  })
+
+  const [voucher, setVoucher] = useState(
+    localStorage.getItem('voucher')
+      ? JSON.parse(localStorage.getItem('voucher') as string)
+      : { discount: 1 },
+  )
+
+  const additionalProducts = useMemo(
+    () => ({
+      sticks,
+      studySticks,
+      personCount,
+    }),
+    [sticks, studySticks, personCount],
+  )
+
   useEffect(() => {
     localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts))
-  }, [selectedProducts])
+    localStorage.setItem(
+      'additionalProducts',
+      JSON.stringify(additionalProducts),
+    )
+    localStorage.setItem('voucher', JSON.stringify(voucher))
+  }, [selectedProducts, additionalProducts, voucher])
 
   const addProduct = useCallback(
     (product: Product, count?: number) => {
@@ -100,6 +160,10 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       delete newState[product.id]
       return newState
     })
+  }, [])
+
+  const clearProductList = useCallback(() => {
+    setSelectedProducts({})
   }, [])
 
   const removeProduct = useCallback(
@@ -150,8 +214,12 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       totalWeight,
       totalPrice,
       productsCount: Object.values(selectedProducts).length,
+      personCount,
+      sticks,
+      studySticks,
+      voucher,
     }),
-    [selectedProducts],
+    [selectedProducts, personCount, sticks, studySticks, voucher],
   )
 
   const contextDispatchValue = useMemo(
@@ -160,8 +228,23 @@ const BasketProvider = ({ children }: { children: ReactNode }) => {
       removeProduct,
       deleteProduct,
       isProductAdded,
+      setPersonCount,
+      setSticks,
+      clearProductList,
+      setStudySticks,
+      setVoucher,
     }),
-    [addProduct, deleteProduct, removeProduct, isProductAdded],
+    [
+      addProduct,
+      deleteProduct,
+      removeProduct,
+      isProductAdded,
+      setPersonCount,
+      setSticks,
+      clearProductList,
+      setStudySticks,
+      setVoucher,
+    ],
   )
 
   return (

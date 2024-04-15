@@ -32,7 +32,7 @@ const BasketType = ({ setSelectedBasketType }: Props) => {
         <DrawerCloseButton pos="static" />
       </DrawerHeader>
 
-      <DrawerBody>
+      <DrawerBody pr="2">
         <Flex flexDir="column" gap={5}>
           <Text fontSize={15} fontWeight={600}>
             Your order

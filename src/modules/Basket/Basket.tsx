@@ -1,5 +1,4 @@
 import {
-  Box,
   Center,
   Drawer,
   DrawerContent,
@@ -12,10 +11,12 @@ import { BasketTypes } from '../../types'
 import BasketType from './BasketType'
 import { useState } from 'react'
 import { useBasketContext } from '../../contexts/BasketContext'
+import { StatusForm } from './StatusForm'
 
 const Basket = () => {
   const [selectedBaketType, setSelectedBasketType] =
     useState<BasketTypes>('basket')
+  const [orderId, setOrderId] = useState<number | undefined>()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { productsCount } = useBasketContext()
   return (
@@ -60,7 +61,16 @@ const Basket = () => {
             <BasketType setSelectedBasketType={setSelectedBasketType} />
           )}
           {selectedBaketType === 'delivery' && (
-            <DeliveryForm setSelectedBasketType={setSelectedBasketType} />
+            <DeliveryForm
+              setOrderId={setOrderId}
+              setSelectedBasketType={setSelectedBasketType}
+            />
+          )}
+          {selectedBaketType === 'orderResponse' && (
+            <StatusForm
+              orderId={orderId}
+              setSelectedBasketType={setSelectedBasketType}
+            />
           )}
         </DrawerContent>
       </Drawer>
