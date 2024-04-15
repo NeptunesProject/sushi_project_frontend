@@ -15,6 +15,7 @@ const CategoryGrid = <T extends Product>({ title, products }: Props<T>) => {
         textTransform="capitalize"
         fontSize={28}
         color="blue.200"
+        scrollMargin={100}
       >
         {title}
       </Heading>

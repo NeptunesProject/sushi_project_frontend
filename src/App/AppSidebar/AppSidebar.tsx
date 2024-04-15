@@ -2,27 +2,25 @@ import { Flex, Image, Text } from '@chakra-ui/react'
 import { CATEGORY } from './constants'
 import { useTranslation } from 'react-i18next'
 import useCategories from '../../hooks/useCategories'
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { Category } from '../../types'
-
-const scrollToSection = (categoryName: string) => {
-  const sectionId = `${categoryName}`
-  const section = document.getElementById(sectionId)
-
-  if (section) {
-    const offsetTop = section.offsetTop - 200
-    window.scrollTo({
-      top: offsetTop,
-      behavior: 'smooth',
-    })
-  }
-}
 
 const AppSidebar = () => {
   const { i18n } = useTranslation()
   const { categories } = useCategories()
 
   const currentLanguage = i18n.language
+
+  const sidebarRef = useRef<HTMLDivElement | null>(null)
+
+  const scrollToSection = (categoryName: string) => {
+    const sectionId = `${categoryName}`
+    const section = document.getElementById(sectionId)
+
+    if (section && sidebarRef.current) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
 
   const categoriesWithMetadata = useMemo(() => {
     if (!categories) return []
@@ -67,6 +65,7 @@ const AppSidebar = () => {
       justify="space-between"
       boxShadow="2px 7px 11px rgba(0,0,0,.07)"
       borderBottomRadius={{ base: 0, lg: 10 }}
+      ref={sidebarRef}
     >
       {categoriesWithMetadata.map((category) => (
         <Flex
