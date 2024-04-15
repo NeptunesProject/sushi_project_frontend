@@ -14,21 +14,16 @@ interface Props {
 }
 
 const ProductCard = ({ product }: Props) => {
-  const { addProduct, isProductAdded, calculateDiscountedPrice } =
-    useBasketDispatchContext()
+  const {
+    addProduct,
+    isProductAdded,
+    calculateDiscountedPrice,
+    removeProduct,
+  } = useBasketDispatchContext()
   const { products } = useBasketContext()
-  const [count, setCount] = useState(1)
   const navigate = useNavigate()
 
-  const {
-    img,
-    price,
-    weight,
-    cartCount,
-    name,
-    id,
-    // discount will be here
-  } = product
+  const [count, setCount] = useState(1)
 
   const discount = {
     id: 1,
@@ -41,11 +36,34 @@ const ProductCard = ({ product }: Props) => {
 
   const isThisProductAdded = useMemo(() => isProductAdded(product), [products])
 
+  const findProductById = (id: number) => {
+    const product = products.find((item) => item.id === id)
+    return product ? product.count : 0
+  }
+
+  const quantity = findProductById(product.id)
+
   const discountedPrice = calculateDiscountedPrice(
-    price,
+    product.price,
     discount.discountPerQuantity,
-    count,
+    quantity ? quantity : count,
   )
+
+  const handleIncrement = () => {
+    if (quantity) {
+      addProduct(product)
+    } else {
+      setCount((prevCount) => prevCount + 1)
+    }
+  }
+
+  const handleDecrement = () => {
+    if (quantity && quantity > 1) {
+      removeProduct(product)
+    } else if (count > 1) {
+      setCount((prevCount) => prevCount - 1)
+    }
+  }
 
   return (
     <Flex
@@ -58,10 +76,10 @@ const ProductCard = ({ product }: Props) => {
     >
       <Image
         fallback={<Image w={180} h={170} borderLeftRadius={10} src={stubImg} />}
-        onClick={() => navigate(`/product/${id}`)}
+        onClick={() => navigate(`/product/${product.id}`)}
         w={180}
         h={170}
-        src={img}
+        src={product.img}
         borderLeftRadius={10}
       />
 
@@ -75,7 +93,7 @@ const ProductCard = ({ product }: Props) => {
         overflow="hidden"
       >
         <Text
-          onClick={() => navigate(`/product/${id}`)}
+          onClick={() => navigate(`/product/${product.id}`)}
           fontSize={15}
           lineHeight="19px"
           fontWeight={700}
@@ -83,40 +101,31 @@ const ProductCard = ({ product }: Props) => {
           color="blue.200"
           whiteSpace="nowrap"
         >
-          {name}
+          {product.name}
         </Text>
 
         <Text fontSize={12} fontWeight={200} color="black" alignSelf="start">
-          {weight} / {cartCount}
+          {product.weight} / {product.cartCount}
         </Text>
 
         <Flex align="center" justify="space-between" w="100%">
           <Text color="blue.200" fontWeight={700}>
-            {price} zł
+            {product.price} zł
           </Text>
           <Text color="blue.200" fontWeight={700}>
             {discountedPrice} zł
           </Text>
           <Flex gap={{ base: 0.5, md: 1 }}>
             <CountButton
-              onClick={(e) => {
-                e.preventDefault()
-                if (count > 1) {
-                  setCount((prev) => prev - 1)
-                }
-              }}
+              onClick={handleDecrement}
               borderLeftRadius={20}
               borderRightRadius={5}
             >
               -
             </CountButton>
-            <Text>{count}</Text>
-
+            <Text>{quantity ? quantity : count}</Text>
             <CountButton
-              onClick={(e) => {
-                e.preventDefault()
-                setCount((prev) => prev + 1)
-              }}
+              onClick={handleIncrement}
               borderRightRadius={20}
               borderLeftRadius={5}
             >
@@ -132,6 +141,7 @@ const ProductCard = ({ product }: Props) => {
           borderRadius={20}
           onClick={() => {
             addProduct(product, count)
+            setCount(1)
           }}
         >
           {isThisProductAdded ? 'Added to basket' : 'Buy'}
