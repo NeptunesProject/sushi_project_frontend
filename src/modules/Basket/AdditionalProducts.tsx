@@ -11,6 +11,36 @@ const AdditionalProducts = () => {
   const { setPersonCount, setSticks, setStudySticks } =
     useBasketDispatchContext()
 
+  const handlePersonCountDecrement = () => {
+    if (personCount > 1) {
+      setPersonCount(personCount - 1)
+    }
+  }
+
+  const handlePersonCountIncrement = () => {
+    setPersonCount(personCount + 1)
+  }
+
+  const handleSticksDecrement = () => {
+    if (sticks > 0) {
+      setSticks(sticks - 1)
+    }
+  }
+
+  const handleSticksIncrement = () => {
+    setSticks(sticks + 1)
+  }
+
+  const handleStudySticksDecrement = () => {
+    if (studySticks > 0) {
+      setStudySticks(studySticks - 1)
+    }
+  }
+
+  const handleStudySticksIncrement = () => {
+    setStudySticks(studySticks + 1)
+  }
+
   return (
     <Flex flexDir="column" fontWeight={600} gap={3}>
       <Flex w="100%" justify="space-between">
@@ -20,12 +50,7 @@ const AdditionalProducts = () => {
           <CountButton
             borderLeftRadius={20}
             borderRightRadius={5}
-            onClick={(e) => {
-              e.preventDefault()
-              if (personCount > 1) {
-                setPersonCount(personCount - 1)
-              }
-            }}
+            onClick={handlePersonCountDecrement}
           >
             -
           </CountButton>
@@ -37,10 +62,7 @@ const AdditionalProducts = () => {
           <CountButton
             borderRightRadius={20}
             borderLeftRadius={5}
-            onClick={(e) => {
-              e.preventDefault()
-              setPersonCount(personCount + 1)
-            }}
+            onClick={handlePersonCountIncrement}
           >
             +
           </CountButton>
@@ -54,12 +76,7 @@ const AdditionalProducts = () => {
           <CountButton
             borderLeftRadius={20}
             borderRightRadius={5}
-            onClick={(e) => {
-              e.preventDefault()
-              if (sticks > 0) {
-                setSticks(sticks - 1)
-              }
-            }}
+            onClick={handleSticksDecrement}
           >
             -
           </CountButton>
@@ -71,10 +88,7 @@ const AdditionalProducts = () => {
           <CountButton
             borderRightRadius={20}
             borderLeftRadius={5}
-            onClick={(e) => {
-              e.preventDefault()
-              setSticks(sticks + 1)
-            }}
+            onClick={handleSticksIncrement}
           >
             +
           </CountButton>
@@ -87,12 +101,7 @@ const AdditionalProducts = () => {
           <CountButton
             borderLeftRadius={20}
             borderRightRadius={5}
-            onClick={(e) => {
-              e.preventDefault()
-              if (studySticks > 0) {
-                setStudySticks(studySticks - 1)
-              }
-            }}
+            onClick={handleStudySticksDecrement}
           >
             -
           </CountButton>
@@ -104,10 +113,7 @@ const AdditionalProducts = () => {
           <CountButton
             borderRightRadius={20}
             borderLeftRadius={5}
-            onClick={(e) => {
-              e.preventDefault()
-              setStudySticks(studySticks + 1)
-            }}
+            onClick={handleStudySticksIncrement}
           >
             +
           </CountButton>
